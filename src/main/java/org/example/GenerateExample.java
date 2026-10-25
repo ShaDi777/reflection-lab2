@@ -1,17 +1,15 @@
 package org.example;
 
 
-import org.example.classes.Example;
-import org.example.generator.Generator;
+import java.lang.reflect.Modifier;
+import org.example.generator.registry.Generatable;
 
 public class GenerateExample {
     public static void main(String[] args) {
-        var gen = new Generator();
-        try {
-            Object generated = gen.generateValueOfType(Example.class);
-            System.out.println(generated);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
+        record Letter(String name) {}
+
+        System.out.println(
+            Modifier.isAbstract(Generatable.class.getModifiers())
+        );
     }
 }

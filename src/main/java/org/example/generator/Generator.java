@@ -1,18 +1,14 @@
 package org.example.generator;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Random;
+public interface Generator {
+    void setRoot(Generator root);
 
-public class Generator {
+    Generator getRoot();
 
-    public Object generateValueOfType(Class<?> clazz) throws InvocationTargetException, InstantiationException, IllegalAccessException {
-        Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+    Generator setNext(Generator next);
 
-        int randomConstructorIndex = new Random().nextInt(constructors.length);
-        Constructor<?> randomConstructor = constructors[randomConstructorIndex];
-        return randomConstructor.newInstance(111);
-    }
+    Generator getNext();
 
-
+    <T> T generateValueOfType(Class<T> clazz);
+    //throws InvocationTargetException, InstantiationException, IllegalAccessException
 }
