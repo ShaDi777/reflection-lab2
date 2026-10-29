@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test;
 public class GeneratorTest {
     private GeneratorRegistry registry = new GeneratorRegistry("org.example.classes", ArrayList.class);
     private Generator generator = new PrimitiveGenerator()
+                                      .setNext(new StringGenerator())
                                       .setNext(new ArrayGenerator())
                                       .setNext(new EnumGenerator())
                                       .setNext(new CollectionGenerator())
+                                      .setNext(new MapGenerator())
                                       .setNext(new AbstractGenerator(registry))
                                       .setNext(new ClassGenerator())
                                       .getRoot();
