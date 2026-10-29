@@ -13,7 +13,8 @@ public class AbstractGenerator extends BaseGenerator {
     @Override
     public <T> T generateValueOfType(Class<T> clazz) {
         if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
-            return (T) reGenerateValue(registry.getRandomImplementingClass(clazz));
+            Class<?> implementation = registry.getRandomImplementingClass(clazz);
+            return clazz.cast(reGenerateValue(implementation));
         }
 
         return generateWithNext(clazz);

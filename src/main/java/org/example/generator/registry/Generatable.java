@@ -1,6 +1,11 @@
 package org.example.generator.registry;
 
-// TODO annotate classes that can be used
-//  to generate abstract/interface implementations
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface Generatable {
 }
