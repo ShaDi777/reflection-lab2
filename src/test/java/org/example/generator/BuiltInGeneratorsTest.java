@@ -18,7 +18,8 @@ import org.example.generator.registry.GeneratorRegistry;
 import org.junit.jupiter.api.Test;
 
 class BuiltInGeneratorsTest {
-    private final Generator generator = new PrimitiveGenerator()
+    private final Generator generator = new RecursiveGenerator()
+        .setNext(new PrimitiveGenerator())
         .setNext(new StringGenerator())
         .setNext(new ArrayGenerator())
         .setNext(new EnumGenerator())

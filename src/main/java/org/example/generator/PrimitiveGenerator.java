@@ -16,7 +16,6 @@ public class PrimitiveGenerator extends BaseGenerator {
         addPairedGenerator(double.class, Double.class, () -> RANDOM.nextDouble(2048));
         addPairedGenerator(char.class, Character.class, () -> (char) (RANDOM.nextInt(26) + 'a'));
         addPairedGenerator(boolean.class, Boolean.class, RANDOM::nextBoolean);
-        addPairedGenerator(void.class, Void.class, () -> null);
     }
 
     private static <T> void addPairedGenerator(Class<T> primitive, Class<T> wrapper, Supplier<T> supplier) {
@@ -26,8 +25,12 @@ public class PrimitiveGenerator extends BaseGenerator {
 
     @Override
     public <T> T generateValueOfType(Class<T> clazz) {
+        if (clazz == void.class || clazz == Void.class) {
+            throw new IllegalArgumentException("Generation of void values is not supported");
+        }
+
         if (clazz.isPrimitive() || GENERATORS.containsKey(clazz)) {
-            return (T) GENERATORS.get(clazz).get();
+            return clazz.cast(GENERATORS.get(clazz).get());
         }
 
         return generateWithNext(clazz);

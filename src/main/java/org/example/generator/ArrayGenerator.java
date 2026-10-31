@@ -11,7 +11,9 @@ public class ArrayGenerator extends BaseGenerator {
     }
 
     public ArrayGenerator(int lowerBound, int upperBound) {
-        assert lowerBound <= upperBound : "lowerBound <= upperBound";
+        if (lowerBound <= 0 || upperBound < lowerBound || upperBound == Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Array bounds must be 0 < lowerBound <= upperBound < Integer.MAX_VALUE");
+        }
         this.minSize = lowerBound;
         this.maxSize = upperBound;
     }
@@ -26,7 +28,7 @@ public class ArrayGenerator extends BaseGenerator {
             for (int i = 0; i < length; i++) {
                 Array.set(array, i, reGenerateValue(componentType));
             }
-            return (T) array;
+            return clazz.cast(array);
         }
 
         return generateWithNext(clazz);

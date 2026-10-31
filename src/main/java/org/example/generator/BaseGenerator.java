@@ -37,13 +37,12 @@ public abstract class BaseGenerator implements Generator {
 
     protected <T> T generateWithNext(Class<T> clazz) {
         if (next == null) {
-            throw new IllegalArgumentException("Applicable Generator not found");
+            throw new IllegalArgumentException("Applicable generator not found for " + clazz.getTypeName());
         }
         return next.generateValueOfType(clazz);
     }
 
-    // TODO think of recursion
     protected <T> T reGenerateValue(Class<T> clazz) {
-        return this.root.generateValueOfType(clazz);
+        return root.generateValueOfType(clazz);
     }
 }
