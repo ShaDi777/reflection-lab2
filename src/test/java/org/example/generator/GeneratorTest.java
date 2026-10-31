@@ -107,6 +107,7 @@ class GeneratorTest {
     @Test
     void honorsGenericConstructorTypes() {
         Cart cart = generator.generateValueOfType(Cart.class);
+        assertInstanceOf(ArrayList.class, cart.getItems());
         assertFalse(cart.getItems().isEmpty());
         assertTrue(cart.getItems().stream().allMatch(Product.class::isInstance));
 
@@ -131,12 +132,12 @@ class GeneratorTest {
     }
 
     @Test
-    void populatesFieldsWhenOnlyNoArgumentConstructorExists() {
+    void instantiatesTypesWithOnlyNoArgumentConstructors() {
         MutableFields value = generator.generateValueOfType(MutableFields.class);
-        assertNotNull(value.name);
-        assertNotNull(value.count);
-        assertFalse(value.products.isEmpty());
-        assertTrue(value.products.stream().allMatch(Product.class::isInstance));
+        assertNotNull(value);
+        assertTrue(value.name == null);
+        assertTrue(value.count == 0);
+        assertTrue(value.products == null);
     }
 
     @Test

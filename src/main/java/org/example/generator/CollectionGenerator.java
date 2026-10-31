@@ -4,24 +4,37 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class CollectionGenerator extends BaseGenerator {
     private static final int SIZE = 5;
     private static final List<Class<? extends Collection>> DEFAULT_IMPLEMENTATIONS = List.of(
         ArrayList.class,
+        LinkedList.class,
+        Vector.class,
+        CopyOnWriteArrayList.class,
         LinkedHashSet.class,
+        CopyOnWriteArraySet.class,
         TreeSet.class,
+        ConcurrentSkipListSet.class,
         ArrayDeque.class,
-        PriorityQueue.class
+        PriorityQueue.class,
+        LinkedBlockingQueue.class,
+        LinkedBlockingDeque.class,
+        LinkedTransferQueue.class,
+        PriorityBlockingQueue.class
     );
 
     @Override
@@ -38,46 +51,28 @@ public class CollectionGenerator extends BaseGenerator {
         return clazz.cast(collection);
     }
 
-    @SuppressWarnings("unchecked")
     private static Collection<Object> createCollection(Class<?> clazz) {
         if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
-            try {
-                return (Collection<Object>) clazz.getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException exception) {
-                throw new IllegalArgumentException(
-                    "Cannot create collection " + clazz.getTypeName()
-                        + ": a usable no-argument constructor is required",
-                    exception
-                );
-            }
+            return emptyCollection(clazz);
         }
 
-        Class<? extends Collection> defaultImplementation;
-        if (clazz == Collection.class || clazz == List.class) {
-            defaultImplementation = ArrayList.class;
-        } else if (clazz == Set.class) {
-            defaultImplementation = LinkedHashSet.class;
-        } else if (clazz == SortedSet.class || clazz == NavigableSet.class) {
-            defaultImplementation = TreeSet.class;
-        } else if (clazz == Queue.class) {
-            defaultImplementation = ArrayDeque.class;
-        } else if (clazz == Deque.class) {
-            defaultImplementation = ArrayDeque.class;
-        } else {
-            defaultImplementation = DEFAULT_IMPLEMENTATIONS.stream()
-                                                           .filter(clazz::isAssignableFrom)
-                                                           .findFirst()
-                                                           .orElseThrow(() -> new IllegalArgumentException(
-                                                               "No default collection implementation for " +
-                                                                   clazz.getTypeName()));
-        }
+        Class<?> implementation = DEFAULT_IMPLEMENTATIONS
+                                      .stream()
+                                      .filter(clazz::isAssignableFrom)
+                                      .findAny()
+                                      .orElseThrow(() -> new IllegalArgumentException(
+                                          "No default collection implementation for " +
+                                              clazz.getTypeName()));
+        return emptyCollection(implementation);
+    }
 
+    @SuppressWarnings("unchecked")
+    private static Collection<Object> emptyCollection(Class<?> implementation) {
         try {
-            return (Collection<Object>) defaultImplementation.getDeclaredConstructor().newInstance();
+            return (Collection<Object>) implementation.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException(
-                "Cannot create default collection "
-                    + defaultImplementation.getTypeName(),
+                "Cannot create empty collection " + implementation.getTypeName(),
                 exception
             );
         }

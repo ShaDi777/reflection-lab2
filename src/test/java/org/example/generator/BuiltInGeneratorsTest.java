@@ -12,8 +12,15 @@ import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Queue;
 import java.util.Set;
+import java.util.SequencedCollection;
+import java.util.SequencedMap;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.TransferQueue;
 import org.example.generator.registry.GeneratorRegistry;
 import org.junit.jupiter.api.Test;
 
@@ -32,12 +39,16 @@ class BuiltInGeneratorsTest {
     @Test
     void generatesNonEmptyBasicCollectionInterfaces() {
         assertNonEmpty(generator.generateValueOfType(Collection.class));
+        assertNonEmpty(generator.generateValueOfType(SequencedCollection.class));
         assertNonEmpty(generator.generateValueOfType(List.class));
         assertNonEmpty(generator.generateValueOfType(Set.class));
         assertNonEmpty(generator.generateValueOfType(SortedSet.class));
         assertNonEmpty(generator.generateValueOfType(NavigableSet.class));
         assertNonEmpty(generator.generateValueOfType(Queue.class));
         assertNonEmpty(generator.generateValueOfType(Deque.class));
+        assertNonEmpty(generator.generateValueOfType(BlockingQueue.class));
+        assertNonEmpty(generator.generateValueOfType(BlockingDeque.class));
+        assertNonEmpty(generator.generateValueOfType(TransferQueue.class));
     }
 
     @Test
@@ -45,6 +56,9 @@ class BuiltInGeneratorsTest {
         assertNonEmpty(generator.generateValueOfType(Map.class));
         assertNonEmpty(generator.generateValueOfType(SortedMap.class));
         assertNonEmpty(generator.generateValueOfType(NavigableMap.class));
+        assertNonEmpty(generator.generateValueOfType(SequencedMap.class));
+        assertNonEmpty(generator.generateValueOfType(ConcurrentMap.class));
+        assertNonEmpty(generator.generateValueOfType(ConcurrentNavigableMap.class));
     }
 
     @Test

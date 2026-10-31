@@ -1,14 +1,27 @@
 package org.example.generator;
 
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class MapGenerator extends BaseGenerator {
     private static final int SIZE = 5;
+    private static final List<Class<? extends Map>> DEFAULT_IMPLEMENTATIONS = List.of(
+        HashMap.class,
+        LinkedHashMap.class,
+        TreeMap.class,
+        ConcurrentHashMap.class,
+        ConcurrentSkipListMap.class,
+        Hashtable.class,
+        IdentityHashMap.class
+    );
 
     @Override
     public <T> T generateValueOfType(Class<T> clazz) {
@@ -25,36 +38,30 @@ public class MapGenerator extends BaseGenerator {
         return clazz.cast(map);
     }
 
-    @SuppressWarnings("unchecked")
     private static Map<Object, Object> createMap(Class<?> clazz) {
         if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
-            try {
-                return (Map<Object, Object>) clazz.getDeclaredConstructor().newInstance();
-            } catch (ReflectiveOperationException exception) {
-                throw new IllegalArgumentException("Cannot create map " + clazz.getTypeName()
-                                                       + ": a usable no-argument constructor is required",
-                                                   exception);
-            }
+            return emptyMap(clazz);
         }
 
-        Class<? extends Map> implementation;
-        if (clazz == SortedMap.class || clazz == NavigableMap.class) {
-            implementation = TreeMap.class;
-        } else if (clazz == Map.class) {
-            implementation = LinkedHashMap.class;
-        } else if (clazz.isAssignableFrom(LinkedHashMap.class)) {
-            implementation = LinkedHashMap.class;
-        } else if (clazz.isAssignableFrom(TreeMap.class)) {
-            implementation = TreeMap.class;
-        } else {
-            throw new IllegalArgumentException("No default map implementation for " + clazz.getTypeName());
-        }
+        Class<?> implementation = DEFAULT_IMPLEMENTATIONS
+                                      .stream()
+                                      .filter(clazz::isAssignableFrom)
+                                      .findAny()
+                                      .orElseThrow(() -> new IllegalArgumentException(
+                                          "No default map implementation for " + clazz.getTypeName()));
 
+        return emptyMap(implementation);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Object, Object> emptyMap(Class<?> implClass) {
         try {
-            return (Map<Object, Object>) implementation.getDeclaredConstructor().newInstance();
+            return (Map<Object, Object>) implClass.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Cannot create default map " + implementation.getTypeName(),
-                                            exception);
+            throw new IllegalStateException(
+                "Cannot create empty map " + implClass.getTypeName(),
+                exception
+            );
         }
     }
 }

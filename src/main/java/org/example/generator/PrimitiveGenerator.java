@@ -24,13 +24,14 @@ public class PrimitiveGenerator extends BaseGenerator {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T generateValueOfType(Class<T> clazz) {
         if (clazz == void.class || clazz == Void.class) {
             throw new IllegalArgumentException("Generation of void values is not supported");
         }
 
         if (clazz.isPrimitive() || GENERATORS.containsKey(clazz)) {
-            return clazz.cast(GENERATORS.get(clazz).get());
+            return (T) GENERATORS.get(clazz).get();
         }
 
         return generateWithNext(clazz);
