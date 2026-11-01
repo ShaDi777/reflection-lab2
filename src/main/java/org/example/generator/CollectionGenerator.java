@@ -1,6 +1,8 @@
 package org.example.generator;
 
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,11 +46,28 @@ public class CollectionGenerator extends BaseGenerator {
         }
 
         Collection<Object> collection = createCollection(clazz);
+        fillCollection(collection, String.class);
+        return clazz.cast(collection);
+    }
+
+    @Override
+    public Object generateValueOfType(Type type) {
+        if (!(type instanceof ParameterizedType parameterizedType)
+                || !(parameterizedType.getRawType() instanceof Class<?> rawClass)
+                || !Collection.class.isAssignableFrom(rawClass)) {
+            return super.generateValueOfType(type);
+        }
+
+        Collection<Object> collection = createCollection(rawClass);
+        fillCollection(collection, parameterizedType.getActualTypeArguments()[0]);
+        return collection;
+    }
+
+    private void fillCollection(Collection<Object> collection, Type elementType) {
         for (int i = 0; i < SIZE; i++) {
-            String value = reGenerateValue(String.class) + "-" + i;
+            Object value = reGenerateValue(elementType);
             collection.add(value);
         }
-        return clazz.cast(collection);
     }
 
     private static Collection<Object> createCollection(Class<?> clazz) {

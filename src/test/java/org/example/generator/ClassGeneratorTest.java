@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,23 @@ class ClassGeneratorTest {
     }
 
     @Test
+    void routesNestedParameterizedTypesThroughTheChain() throws Exception {
+        Type nestedType = NestedGenericHolder.class.getDeclaredField("products").getGenericType();
+
+        Object value = generator.generateValueOfType(nestedType);
+
+        assertInstanceOf(List.class, value);
+        assertFalse(((List<?>) value).isEmpty());
+        assertTrue(((List<?>) value).stream().allMatch(Map.class::isInstance));
+        for (Object nestedMap : (List<?>) value) {
+            Map<?, ?> products = (Map<?, ?>) nestedMap;
+            assertFalse(products.isEmpty());
+            assertTrue(products.keySet().stream().allMatch(String.class::isInstance));
+            assertTrue(products.values().stream().allMatch(Product.class::isInstance));
+        }
+    }
+
+    @Test
     void supportsNoArgumentConstructorsAndLeavesFieldsAtDefaults() {
         NoArgumentType value = generator.generateValueOfType(NoArgumentType.class);
         assertEquals(0, value.number);
@@ -70,6 +88,10 @@ class ClassGeneratorTest {
         TypedMapHolder(Map<String, Product> products) {
             this.products = products;
         }
+    }
+
+    static class NestedGenericHolder {
+        private List<Map<String, Product>> products;
     }
 
     static class NoArgumentType {

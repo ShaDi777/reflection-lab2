@@ -1,5 +1,8 @@
 package org.example.generator;
 
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class BaseGenerator implements Generator {
@@ -35,6 +38,21 @@ public abstract class BaseGenerator implements Generator {
         return next;
     }
 
+    @Override
+    public Object generateValueOfType(Type type) {
+        return switch (type) {
+            case Class<?> clazz -> generateValueOfType(clazz);
+            case WildcardType wildcardType -> generateValueOfType(firstBoundOrObject(wildcardType.getUpperBounds()));
+            case TypeVariable<?> typeVariable -> generateValueOfType(firstBoundOrObject(typeVariable.getBounds()));
+            default -> generateWithNext(type);
+        };
+    }
+
+    protected static Type firstBoundOrObject(Type[] bounds) {
+        return bounds.length == 0 ? Object.class : bounds[0];
+    }
+
+    /** CHAIN FUNCTIONS */
     protected <T> T generateWithNext(Class<T> clazz) {
         if (next == null) {
             throw new IllegalArgumentException("Applicable generator not found for " + clazz.getTypeName());
@@ -42,7 +60,19 @@ public abstract class BaseGenerator implements Generator {
         return next.generateValueOfType(clazz);
     }
 
+    protected Object generateWithNext(Type type) {
+        if (next == null) {
+            throw new IllegalArgumentException("Applicable generator not found for " + type.getTypeName());
+        }
+        return next.generateValueOfType(type);
+    }
+
+    /** RE-GENERATE FROM START FUNCTIONS */
     protected <T> T reGenerateValue(Class<T> clazz) {
         return root.generateValueOfType(clazz);
+    }
+
+    protected Object reGenerateValue(Type type) {
+        return root.generateValueOfType(type);
     }
 }

@@ -1,6 +1,8 @@
 package org.example.generator;
 
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
@@ -30,12 +32,30 @@ public class MapGenerator extends BaseGenerator {
         }
 
         Map<Object, Object> map = createMap(clazz);
+        fillMap(map, String.class, String.class);
+        return clazz.cast(map);
+    }
+
+    @Override
+    public Object generateValueOfType(Type type) {
+        if (!(type instanceof ParameterizedType parameterizedType)
+                || !(parameterizedType.getRawType() instanceof Class<?> rawClass)
+                || !Map.class.isAssignableFrom(rawClass)) {
+            return super.generateValueOfType(type);
+        }
+
+        Type[] arguments = parameterizedType.getActualTypeArguments();
+        Map<Object, Object> map = createMap(rawClass);
+        fillMap(map, arguments[0], arguments[1]);
+        return map;
+    }
+
+    private void fillMap(Map<Object, Object> map, Type keyType, Type valueType) {
         for (int i = 0; i < SIZE; i++) {
-            String key = reGenerateValue(String.class) + "-" + i;
-            String value = reGenerateValue(String.class);
+            Object key = reGenerateValue(keyType);
+            Object value = reGenerateValue(valueType);
             map.put(key, value);
         }
-        return clazz.cast(map);
     }
 
     private static Map<Object, Object> createMap(Class<?> clazz) {
