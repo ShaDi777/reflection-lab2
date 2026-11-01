@@ -1,8 +1,11 @@
 package org.example.generator;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.stream.Stream;
 import org.example.classes.Letter;
+import org.example.classes.Product;
 import org.example.classes.Rectangle;
 import org.example.classes.Shape;
 import org.junit.jupiter.api.Test;
@@ -49,11 +52,30 @@ class ArrayGeneratorTest {
         assertTrue(exception.getMessage().contains(Runnable.class.getTypeName()));
     }
 
+    @Test
+    void generatesGenericArraysWithParameterizedComponentTypes() throws Exception {
+        Type type = GenericArrayHolder.class.getDeclaredField("values").getGenericType();
+
+        Object value = generator.generateValueOfType(type);
+
+        assertTrue(value instanceof List<?>[]);
+        List<?>[] lists = (List<?>[]) value;
+        assertTrue(lists.length > 0);
+        for (List<?> list : lists) {
+            assertNotNull(list);
+            assertTrue(list.stream().allMatch(Letter.class::isInstance));
+        }
+    }
+
     private static Stream<Class<?>> arrayTypes() {
         return Stream.of(
-            int[].class, String[].class, Letter[].class, Rectangle[].class,
+            int[].class, String[].class, Letter[].class, Product[].class, Rectangle[].class,
             double[][].class, Integer[][].class, Shape[][].class
         );
+    }
+
+    static class GenericArrayHolder {
+        private List<Letter>[] values;
     }
 
     private static Class<?> box(Class<?> type) {

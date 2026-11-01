@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.example.classes.Cart;
+import org.example.classes.Complex;
 import org.example.classes.Example;
 import org.example.classes.Product;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,23 @@ class ClassGeneratorTest {
         assertFalse(holder.products.isEmpty());
         assertTrue(holder.products.keySet().stream().allMatch(String.class::isInstance));
         assertTrue(holder.products.values().stream().allMatch(Product.class::isInstance));
+    }
+
+    @Test
+    void generatesComplexWithNestedGenericArrays() {
+        Complex<?> complex = generator.generateValueOfType(Complex.class);
+
+        assertNotNull(complex.getField());
+        assertFalse(complex.getField().isEmpty());
+        assertTrue(complex.getField().values().stream().allMatch(lists -> !lists.isEmpty()));
+        for (List<? extends Object[]> arrays : complex.getField().values()) {
+            for (Object[] array : arrays) {
+                assertNotNull(array);
+                assertTrue(array.length > 0);
+                assertTrue(java.util.Arrays.stream(array).allMatch(Object.class::isInstance));
+            }
+        }
+        System.out.println(complex.getField());
     }
 
     @Test
